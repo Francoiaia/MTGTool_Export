@@ -1,11 +1,23 @@
 from mtgtools.MtgDB import MtgDB
 from tkinter import *
+from tkinter import messagebox
 from tkinter.ttk import *
 import threading
 import sys
+import os
 
+desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
+directory_name = desktop + "\\MTGTool_Export"
 
-mtg_db = MtgDB('./MTGTool/my_db.fs')
+try:
+    os.mkdir(directory_name)
+    print(f"Directory '{directory_name}' created successfully.")
+except FileExistsError:
+    print(f"Directory '{directory_name}' already exists.")
+except PermissionError:
+    print(f"Permission denied: Unable to create '{directory_name}'.")
+
+mtg_db = MtgDB(directory_name + "\\my_db.fs")
 cards = mtg_db.root.scryfall_cards
 
 window = Tk()
@@ -28,7 +40,6 @@ def disable_widg():
     name_text['state'] = 'disabled'
     type_text['state'] = 'disabled'
 
-
 def enable_widg():
     
     button_update_DB['state'] = 'normal'
@@ -36,6 +47,10 @@ def enable_widg():
     expansion_text['state'] = 'normal'
     name_text['state'] = 'normal'
     type_text['state'] = 'normal'
+
+def on_closing():
+    if messagebox.askokcancel("Quit", "Do you want to quit?"):
+        window.destroy() 
 
 def export():
 
@@ -54,7 +69,7 @@ def export():
         
     progress_bar.start()
     mtg_set = cards.where_exactly(**real_args)
-    with open('estrazione.txt', 'w', encoding="utf-8") as f:
+    with open(directory_name + '\estrazione.txt', 'w', encoding="utf-8") as f:
         f.write(mtg_set.pretty_print_str())        
     progress_bar.stop()
     progress_bar.pack_forget()
@@ -65,7 +80,7 @@ def bulk_update():
 
     progress_bar.pack()
     progress_bar.start()
-    mtg_db.scryfall_update()
+    mtg_db.scryfall_bulk_update()
     mtg_db.commit()
     progress_bar.stop()
     progress_bar.pack_forget()
@@ -102,5 +117,6 @@ type_text.lift()
 expansion_text.lift()
 button_update_DB.lift()
 button_export.lift()
+window.protocol("WM_DELETE_WINDOW", on_closing)
 
 window.mainloop()
