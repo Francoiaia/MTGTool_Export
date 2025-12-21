@@ -75,7 +75,6 @@ def export():
     name_value_bool = name_value.get()
     type_value_bool = type_value.get()
 
-
     args = {'name' : name_str, 'set' : set_str, 'type_line' : type_str}
     condition = {'name' : name_value_bool, 'set' : set_value_bool, 'type_line' : type_value_bool}
     where_set = {}
