@@ -30,39 +30,23 @@ except PermissionError:
     print(f"Permission denied: Unable to create '{DBPath}'.")
 
 def Update_DB(event):
-    disable_widg()
     mtg_db.scryfall_bulk_update()
-    enable_widg()
 
 def Export_exp(event):
-    disable_widg()
+
+    widg_management('disabled')
     threading.Thread(target = export).start()
 
-def disable_widg():
-    
-    button_update_DB['state'] = 'disabled'
-    button_export['state'] = 'disabled'
-    expansion_text['state'] = 'disabled'
-    name_text['state'] = 'disabled'
-    type_text['state'] = 'disabled'
-    checkbox_set['state'] = 'disabled'
-    checkbox_name['state'] = 'disabled'
-    checkbox_type['state'] = 'disabled'
-
-def enable_widg():
-    
-    button_update_DB['state'] = 'normal'
-    button_export['state'] = 'normal'
-    expansion_text['state'] = 'normal'
-    name_text['state'] = 'normal'
-    type_text['state'] = 'normal'
-    checkbox_set['state'] = 'normal'
-    checkbox_name['state'] = 'normal'
-    checkbox_type['state'] = 'normal'
-
-def on_closing():
-        #mtg_db.close()
-        window.destroy()
+def widg_management(action):
+    action = str(action)
+    button_update_DB['state'] = action
+    button_export['state'] = action
+    expansion_text['state'] = action
+    name_text['state'] = action
+    type_text['state'] = action
+    checkbox_set['state'] = action
+    checkbox_name['state'] = action
+    checkbox_type['state'] = action
 
 def export():
 
@@ -79,22 +63,33 @@ def export():
     condition = {'name' : name_value_bool, 'set' : set_value_bool, 'type_line' : type_value_bool}
     where_set = {}
     where_exactly_set = {}
+    progress_bar.start()
 
     for (key, val) in args.items():
         if (val!='') :
             if (condition[key] == False) :
                 where_set[key] = val
             else :
-                where_exactly_set[key] = val    
-    progress_bar.start()
-    mtg_set = cards.where_exactly(**where_exactly_set)
-    mtg_set = mtg_set.where(**where_set)
-    with open(directory_name + '\\estrazione.txt', 'w', encoding="utf-8") as f:
-        f.write(mtg_set.pretty_print_str())        
+                where_exactly_set[key] = val 
+
+    if(bool(where_set)):
+        if(bool(where_exactly_set)):
+            mtg_set = cards.where(**where_set)
+            mtg_set = mtg_set.where_exactly(**where_exactly_set)
+        else:
+            mtg_set = cards.where(**where_set)
+    else:
+        if(bool(where_exactly_set)):
+            mtg_set = cards.where_exactly(**where_exactly_set)
+
+    txt = (mtg_set.pretty_print_str())
+    csv = txt.replace("   ", ";")
+    with open(directory_name + '\\estrazione.csv', 'w', encoding="utf-8") as f:
+        f.write(csv)
+
     progress_bar.stop()
     progress_bar.pack_forget()
-
-    enable_widg()
+    widg_management('normal')
 
 progress_bar = Progressbar(orient = HORIZONTAL, length = 100, mode ='indeterminate')
 
@@ -137,7 +132,5 @@ type_text.lift()
 expansion_text.lift()
 button_update_DB.lift()
 button_export.lift()
-
-window.protocol("WM_DELETE_WINDOW", on_closing)
 
 window.mainloop()
