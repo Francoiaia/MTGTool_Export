@@ -7,7 +7,7 @@ import os
 
 desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
 directory_name = desktop + "\\MTGTool_Export\\"
-DBPath = "C:\\temp\\"
+DBPath = "temp\\"
 mtg_db = MtgDB(DBPath + "my_db.fs")
 window = Tk()
 window.title('MTG Tool Export')
@@ -70,7 +70,7 @@ def export():
             if (condition[key] == False) :
                 where_set[key] = val
             else :
-                where_exactly_set[key] = val 
+                where_exactly_set[key] = val
 
     if(bool(where_set)):
         if(bool(where_exactly_set)):

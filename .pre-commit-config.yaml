@@ -1,0 +1,26 @@
+# Pre-commit hooks for MTGTool_Export.
+# Install once:   uv run pre-commit install
+# Run on demand:  uv run pre-commit run --all-files
+#
+# The headline check here is `check-added-large-files`, which blocks any file
+# bigger than --maxkb from being committed. This repo pulls a ~540 MB Scryfall
+# bulk export (default-cards.json) that must never end up in git history.
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      # ---- Git max file size guard ----
+      - id: check-added-large-files
+        name: Block large files (max 1 MB)
+        args: ["--maxkb=1024"]
+
+      # ---- General hygiene ----
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-json
+      - id: check-toml
+      - id: check-yaml
+      - id: detect-private-key
